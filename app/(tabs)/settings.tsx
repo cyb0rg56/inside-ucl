@@ -1,10 +1,9 @@
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 export default function Tab() {
   return (
     <View style={styles.container}>
       <Text>Tab [Home|Settings]</Text>
-      <Button onPress={() => alert('Pressed!')} title="Press me" />
     </View>
   );
 }
