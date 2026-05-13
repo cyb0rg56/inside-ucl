@@ -32,7 +32,23 @@ export default function MyDetailsLayout() {
         name="personal/disability"
         options={{ title: 'Disability' }}
       />
-      <Stack.Screen name="employment" options={{ title: 'Employment Details' }} />
+      <Stack.Screen name="employment/index" options={{ title: 'Employment Details' }} />
+      <Stack.Screen
+        name="employment/payslips"
+        options={{ title: 'Payslips' }}
+      />
+      <Stack.Screen
+        name="employment/contract-details"
+        options={{ title: 'Contract Details' }}
+      />
+      <Stack.Screen
+        name="employment/bank-details"
+        options={{ title: 'Bank Details' }}
+      />
+      <Stack.Screen
+        name="employment/my-appraisal"
+        options={{ title: 'My Appraisal' }}
+      />
       <Stack.Screen name="other" options={{ title: 'Other Details' }} />
     </Stack>
   );

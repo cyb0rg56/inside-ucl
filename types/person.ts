@@ -225,3 +225,146 @@ export type EmergencyContactResponse = {
     emergency_contact: EmergencyContact[];
   };
 };
+
+export type BankDetails = {
+  assignment: {
+    identifier: string;
+    number: string;
+    position: string;
+  };
+  personal_payment_method_id: string;
+  org_payment_method_name: string;
+  bank_code: string;
+  bank_name: string;
+  bank_branch: string;
+  sort_code: string;
+  account_number: string;
+  account_name: string;
+  bldng_soc_ac_no: string;
+  priority: number;
+  amount: string;
+  percentage: string;
+  object_version_number: number;
+};
+
+export type EmploymentInfo = {
+  assignment_number: string;
+  effective_start_date: string | null;
+  effective_end_date: string | null;
+  last_update_date: string | null;
+  primary: boolean;
+  grade: string | null;
+  position: string | null;
+  job_title: string | null;
+  department_name: string | null;
+  location: string | null;
+  employment_category: string | null;
+  work_hours: string | null;
+  frequency: string | null;
+  work_pattern: string | null;
+  assignment_status: string | null;
+  change_reason: string | null;
+  line_manager_name: string | null;
+  date_of_joining: string | null;
+  business_group: string | null;
+  deprived_locale: string | null;
+  people_group: string | null;
+  payroll: string | null;
+  object_version_number: string;
+  sort_order: string;
+};
+
+export type EmploymentInfoResponse = {
+  employment_info_collection: {
+    employment_info: EmploymentInfo[];
+  };
+};
+
+export type PayslipEarning = {
+  assignment_id: string;
+  assignment_number: string;
+  element_name: string;
+  pay_value: number;
+  salary: number;
+  fte: string;
+  count_both_elements: number;
+};
+
+export type PayslipDeduction = {
+  element_name: string;
+  element_value: number;
+};
+
+export type PayslipBalance = {
+  balance_name: string;
+  pay_value: number;
+};
+
+export type Payslip = {
+  person_id: string;
+  employee_details: {
+    employee_name: string;
+    employee_number: string;
+    ni_number: string;
+    department: string;
+    payroll_name: string;
+    email: string;
+    first_name: string;
+  };
+  employee_address: {
+    address_type: string;
+    address_line1: string | null;
+    address_line2: string | null;
+    address_line3: string | null;
+    town_or_city: string | null;
+    county: string | null;
+    post_code: string | null;
+    country: string | null;
+  };
+  employee_pay_proc_info: {
+    period_type: string;
+    period_num: number;
+    payment_month: string;
+    start_date: string | null;
+    end_date: string | null;
+    payment_date: string | null;
+  };
+  employee_tax_details: {
+    tax_code: string;
+    tax_basis: string;
+    ni_category: string;
+    paye_ref: string;
+  };
+  employee_payment_summary: {
+    total_payments_value: number;
+    total_deductions_value: number;
+    total_amount_paid_value: number;
+  };
+  employee_earnings_both: PayslipEarning[];
+  employee_deductions: PayslipDeduction[];
+  employee_additional_payments: PayslipDeduction[];
+  employee_net_pay_distribution: {
+    sort_code: string;
+    account_number: string;
+    net_pay: number;
+    org_payment_method_name: string;
+    bank_name: string;
+  };
+  employee_pay_balances: PayslipBalance[];
+  tax_office_details: {
+    organization_id: string;
+    business_group_id: string;
+    statutory_name: string;
+    statutory_address: string;
+    employer_accounts_off_ref: string;
+    tax_office_phone: string | null;
+    employer_code: string | null;
+    reporting_country: string;
+    reporting_country_desc: string;
+    employer_reference_cms_deo: string | null;
+  };
+  payslip_messages: {
+    standard_message: string | null;
+    payslip_message: string | null;
+  };
+};

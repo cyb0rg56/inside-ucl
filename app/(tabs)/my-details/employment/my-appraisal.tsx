@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function EmploymentDetailsScreen() {
+export default function MyAppraisalScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.placeholder}>Employment Details coming soon.</Text>
+      <Text style={styles.placeholder}>My Appraisal coming soon.</Text>
     </View>
   );
 }
