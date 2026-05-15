@@ -35,12 +35,40 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Optional access-token resolver wired up by the auth provider at runtime.
+ * Kept out of the React tree so plain modules (hooks, side-effects) can call
+ * {@link apiFetch} without threading the auth context through every caller.
+ */
+export type AccessTokenProvider = () => Promise<string | null>;
+
+let accessTokenProvider: AccessTokenProvider | null = null;
+
+export function setAccessTokenProvider(provider: AccessTokenProvider | null): void {
+  accessTokenProvider = provider;
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
 
+  const headers = new Headers(init?.headers);
+  if (!headers.has('Accept')) headers.set('Accept', 'application/json');
+
+  if (accessTokenProvider) {
+    try {
+      const token = await accessTokenProvider();
+      if (token && !headers.has('Authorization')) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+    } catch {
+      // Fall through and let the request go out unauthenticated; the server
+      // will respond with 401 which surfaces as an ApiError below.
+    }
+  }
+
   let response: Response;
   try {
-    response = await fetch(url, init);
+    response = await fetch(url, { ...init, headers });
   } catch (err) {
     const cause = err instanceof Error ? err.message : 'unknown error';
     throw new ApiError(`Network request failed for ${url} (${cause})`);
