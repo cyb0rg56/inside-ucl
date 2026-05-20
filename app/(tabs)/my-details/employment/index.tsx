@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Href, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+
 type Section = {
   key: string;
   title: string;
@@ -38,31 +40,39 @@ const SECTIONS: Section[] = [
 
 export default function EmploymentDetailsIndex() {
   const router = useRouter();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const borderColor = useThemeColor({}, 'border');
+  const chevronColor = useThemeColor({}, 'chevron');
+  const iconColor = useThemeColor({}, 'iconStrong');
+  const pressedColor = useThemeColor({}, 'pressed');
+  const surfaceColor = useThemeColor({}, 'surface');
+  const textColor = useThemeColor({}, 'text');
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
     >
-      <View style={styles.list}>
+      <View style={[styles.list, { backgroundColor: surfaceColor }]}>
         {SECTIONS.map((section, idx) => (
           <Pressable
             key={section.key}
             onPress={() => router.push(section.href)}
             style={({ pressed }) => [
               styles.row,
+              { borderBottomColor: borderColor },
               idx === SECTIONS.length - 1 && styles.rowLast,
-              pressed && styles.rowPressed,
+              pressed && { backgroundColor: pressedColor },
             ]}
-            android_ripple={{ color: '#E5E7EB' }}
+            android_ripple={{ color: borderColor }}
           >
             <View style={styles.rowLeft}>
-              <Ionicons name={section.icon} size={22} color="#1F2937" />
-              <Text style={styles.rowTitle} numberOfLines={2}>
+              <Ionicons name={section.icon} size={22} color={iconColor} />
+              <Text style={[styles.rowTitle, { color: textColor }]} numberOfLines={2}>
                 {section.title}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={20} color={chevronColor} />
           </Pressable>
         ))}
       </View>
@@ -73,7 +83,6 @@ export default function EmploymentDetailsIndex() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     paddingTop: 16,
@@ -81,7 +90,6 @@ const styles = StyleSheet.create({
   },
   list: {
     marginHorizontal: 16,
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -92,13 +100,9 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
   },
   rowLast: {
     borderBottomWidth: 0,
-  },
-  rowPressed: {
-    backgroundColor: '#F3F4F6',
   },
   rowLeft: {
     flex: 1,
@@ -110,7 +114,6 @@ const styles = StyleSheet.create({
   rowTitle: {
     flex: 1,
     fontSize: 17,
-    color: '#111827',
     fontWeight: '500',
   },
 });

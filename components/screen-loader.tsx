@@ -1,15 +1,22 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+
 type ScreenLoaderProps = {
   label?: string;
   color?: string;
 };
 
-export function ScreenLoader({ label, color = '#2563EB' }: ScreenLoaderProps) {
+export function ScreenLoader({ label, color }: ScreenLoaderProps) {
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const themeIndicatorColor = useThemeColor({}, 'primary');
+  const indicatorColor = color ?? themeIndicatorColor;
+  const labelColor = useThemeColor({}, 'textSecondary');
+
   return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color={color} />
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+    <View style={[styles.container, { backgroundColor }]}>
+      <ActivityIndicator size="large" color={indicatorColor} />
+      {label ? <Text style={[styles.label, { color: labelColor }]}>{label}</Text> : null}
     </View>
   );
 }
@@ -17,7 +24,6 @@ export function ScreenLoader({ label, color = '#2563EB' }: ScreenLoaderProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
@@ -25,6 +31,5 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#6B7280',
   },
 });

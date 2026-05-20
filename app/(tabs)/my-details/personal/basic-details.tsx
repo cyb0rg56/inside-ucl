@@ -4,6 +4,7 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePersonDetails } from '@/hooks/use-person-details';
 import {
   formatCodeName,
@@ -90,6 +91,7 @@ function buildRows(details: PersonalDetails): Row[] {
 
 export default function BasicDetailsScreen() {
   const { data, isLoading, error, reload } = usePersonDetails();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
 
   if (isLoading) {
     return <ScreenLoader label="Loading basic details..." />;
@@ -109,7 +111,7 @@ export default function BasicDetailsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -130,7 +132,6 @@ export default function BasicDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,

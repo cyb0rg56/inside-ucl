@@ -4,6 +4,7 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePayslip } from '@/hooks/use-payslip';
 import { formatDate, formatText } from '@/lib/format';
 import type { Payslip } from '@/types/person';
@@ -72,10 +73,10 @@ function buildNetPayRows(payslip: Payslip): Row[] {
   ];
 }
 
-function renderSection(title: string, rows: Row[]) {
+function renderSection(title: string, rows: Row[], sectionTitleColor: string) {
   return (
     <DetailCard>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>{title}</Text>
       {rows.map((row, i) => (
         <DetailRow key={row.key} label={row.label} value={row.value} isLast={i === rows.length - 1} />
       ))}
@@ -85,6 +86,8 @@ function renderSection(title: string, rows: Row[]) {
 
 export default function PayslipsScreen() {
   const { data, isLoading, error, reload } = usePayslip();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading payslip..." />;
@@ -106,13 +109,13 @@ export default function PayslipsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
-      {renderSection('Pay Period', buildPayPeriodRows(data))}
-      {renderSection('Employee', buildEmployeeRows(data))}
-      {renderSection('Payment Summary', buildSummaryRows(data))}
+      {renderSection('Pay Period', buildPayPeriodRows(data), sectionTitleColor)}
+      {renderSection('Employee', buildEmployeeRows(data), sectionTitleColor)}
+      {renderSection('Payment Summary', buildSummaryRows(data), sectionTitleColor)}
 
       {earnings.length > 0 &&
         renderSection(
@@ -122,6 +125,7 @@ export default function PayslipsScreen() {
             label: e.element_name,
             value: formatCurrency(e.pay_value),
           })),
+          sectionTitleColor,
         )}
 
       {deductions.length > 0 &&
@@ -132,10 +136,11 @@ export default function PayslipsScreen() {
             label: d.element_name,
             value: formatCurrency(d.element_value),
           })),
+          sectionTitleColor,
         )}
 
-      {renderSection('Tax Details', buildTaxRows(data))}
-      {renderSection('Net Pay Distribution', buildNetPayRows(data))}
+      {renderSection('Tax Details', buildTaxRows(data), sectionTitleColor)}
+      {renderSection('Net Pay Distribution', buildNetPayRows(data), sectionTitleColor)}
 
       {balances.length > 0 &&
         renderSection(
@@ -145,6 +150,7 @@ export default function PayslipsScreen() {
             label: b.balance_name,
             value: formatCurrency(b.pay_value),
           })),
+          sectionTitleColor,
         )}
     </ScrollView>
   );
@@ -153,7 +159,6 @@ export default function PayslipsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,
@@ -163,7 +168,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 4,

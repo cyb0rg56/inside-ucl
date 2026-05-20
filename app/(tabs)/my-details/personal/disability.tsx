@@ -4,6 +4,7 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useDisabilityDetails } from '@/hooks/use-disability-details';
 import { formatDate, formatText } from '@/lib/format';
 import type { DisabilityDetail } from '@/types/person';
@@ -34,6 +35,8 @@ function buildRows(detail: DisabilityDetail): Row[] {
 
 export default function DisabilityScreen() {
   const { data, isLoading, error, reload } = useDisabilityDetails();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading disability details..." />;
@@ -52,7 +55,7 @@ export default function DisabilityScreen() {
   if (data.length === 0) {
     return (
       <ScrollView
-        style={styles.container}
+        style={[styles.container, { backgroundColor }]}
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic"
       >
@@ -65,7 +68,7 @@ export default function DisabilityScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -74,7 +77,7 @@ export default function DisabilityScreen() {
         return (
           <DetailCard key={detail.disability_id} style={index > 0 ? styles.section : undefined}>
             {data.length > 1 && (
-              <Text style={styles.sectionTitle}>Record {index + 1}</Text>
+              <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Record {index + 1}</Text>
             )}
             {rows.map((row, rowIndex) => (
               <DetailRow
@@ -94,7 +97,6 @@ export default function DisabilityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,
@@ -107,7 +109,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 4,

@@ -4,9 +4,10 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useContactDetails } from '@/hooks/use-contact-details';
 import { formatCodeName, formatDate, formatList, formatText } from '@/lib/format';
-import type { Address, ContactDetails, Phone } from '@/types/person';
+import type { Address, Phone } from '@/types/person';
 
 type Row = {
   key: string;
@@ -40,6 +41,8 @@ function buildPhoneRows(phone: Phone, index: number): Row[] {
 
 export default function ContactDetailsScreen() {
   const { data, isLoading, error, reload } = useContactDetails();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading contact details..." />;
@@ -60,7 +63,7 @@ export default function ContactDetailsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -72,7 +75,7 @@ export default function ContactDetailsScreen() {
         const rows = buildAddressRows(address, index);
         return (
           <DetailCard key={address.identifier} style={styles.section}>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
               {address.is_primary_address ? 'Primary Address' : `Address ${index + 1}`}
             </Text>
             {rows.map((row, rowIndex) => (
@@ -91,7 +94,7 @@ export default function ContactDetailsScreen() {
         const rows = buildPhoneRows(phone, index);
         return (
           <DetailCard key={phone.identifier} style={styles.section}>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
               {`Phone ${phones.length > 1 ? index + 1 : ''}`}
             </Text>
             {rows.map((row, rowIndex) => (
@@ -112,7 +115,6 @@ export default function ContactDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,
@@ -125,7 +127,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 4,

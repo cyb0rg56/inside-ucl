@@ -4,6 +4,7 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useEmergencyContacts } from '@/hooks/use-emergency-contacts';
 import { formatText } from '@/lib/format';
 import type { EmergencyContact } from '@/types/person';
@@ -52,6 +53,8 @@ function buildContactRows(contact: EmergencyContact): Row[] {
 
 export default function EmergencyContactDetailsScreen() {
   const { data, isLoading, error, reload } = useEmergencyContacts();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading emergency contacts..." />;
@@ -70,7 +73,7 @@ export default function EmergencyContactDetailsScreen() {
   if (data.length === 0) {
     return (
       <ScrollView
-        style={styles.container}
+        style={[styles.container, { backgroundColor }]}
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic"
       >
@@ -83,7 +86,7 @@ export default function EmergencyContactDetailsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -92,7 +95,7 @@ export default function EmergencyContactDetailsScreen() {
         return (
           <DetailCard key={contact.con_relationship_id}>
             {data.length > 1 && (
-              <Text style={styles.sectionTitle}>
+              <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
                 {contact.is_primary_contact ? 'Primary Contact' : `Contact ${index + 1}`}
               </Text>
             )}
@@ -114,7 +117,6 @@ export default function EmergencyContactDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,
@@ -124,7 +126,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 4,

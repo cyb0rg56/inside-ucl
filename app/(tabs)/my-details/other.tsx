@@ -1,9 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+
 export default function OtherDetailsScreen() {
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const textColor = useThemeColor({}, 'textSecondary');
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.placeholder}>Other Details coming soon.</Text>
+    <View style={[styles.container, { backgroundColor }]}>
+      <Text style={[styles.placeholder, { color: textColor }]}>Other Details coming soon.</Text>
     </View>
   );
 }
@@ -11,11 +16,9 @@ export default function OtherDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
     padding: 20,
   },
   placeholder: {
     fontSize: 16,
-    color: '#6B7280',
   },
 });

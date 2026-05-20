@@ -1,10 +1,16 @@
 import { Stack } from 'expo-router';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+
 export default function MyDetailsLayout() {
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const headerTintColor = useThemeColor({}, 'text');
+
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: '#F2F2F7' },
+        headerStyle: { backgroundColor },
+        headerTintColor,
         headerTitleStyle: { fontWeight: '600' },
         headerShadowVisible: false,
       }}

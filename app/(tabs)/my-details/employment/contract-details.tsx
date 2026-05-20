@@ -4,6 +4,7 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useEmploymentInfo } from '@/hooks/use-employment-info';
 import { formatDate, formatText } from '@/lib/format';
 import type { EmploymentInfo } from '@/types/person';
@@ -41,6 +42,8 @@ function buildRows(info: EmploymentInfo): Row[] {
 
 export default function ContractDetailsScreen() {
   const { data, isLoading, error, reload } = useEmploymentInfo();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading contract details..." />;
@@ -59,7 +62,7 @@ export default function ContractDetailsScreen() {
   if (data.length === 0) {
     return (
       <ScrollView
-        style={styles.container}
+        style={[styles.container, { backgroundColor }]}
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic"
       >
@@ -72,7 +75,7 @@ export default function ContractDetailsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -81,7 +84,7 @@ export default function ContractDetailsScreen() {
         return (
           <DetailCard key={info.assignment_number}>
             {data.length > 1 && (
-              <Text style={styles.sectionTitle}>
+              <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
                 {info.primary ? 'Primary Assignment' : `Assignment ${index + 1}`}
               </Text>
             )}
@@ -103,7 +106,6 @@ export default function ContractDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,
@@ -113,7 +115,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 4,

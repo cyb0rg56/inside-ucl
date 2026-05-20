@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+
 type DetailRowProps = {
   label: string;
   value: string;
@@ -7,10 +9,14 @@ type DetailRowProps = {
 };
 
 export function DetailRow({ label, value, isLast = false }: DetailRowProps) {
+  const borderColor = useThemeColor({}, 'border');
+  const labelColor = useThemeColor({}, 'textSecondary');
+  const valueColor = useThemeColor({}, 'text');
+
   return (
-    <View style={[styles.row, isLast && styles.rowLast]}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value} selectable>
+    <View style={[styles.row, { borderBottomColor: borderColor }, isLast && styles.rowLast]}>
+      <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
+      <Text style={[styles.value, { color: valueColor }]} selectable>
         {value}
       </Text>
     </View>
@@ -19,7 +25,6 @@ export function DetailRow({ label, value, isLast = false }: DetailRowProps) {
 
 const styles = StyleSheet.create({
   row: {
-    borderBottomColor: '#E5E7EB',
     borderBottomWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -30,10 +35,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: '#6B7280',
   },
   value: {
     fontSize: 16,
-    color: '#111827',
   },
 });

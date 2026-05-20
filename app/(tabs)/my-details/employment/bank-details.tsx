@@ -4,6 +4,7 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useBankDetails } from '@/hooks/use-bank-details';
 import { formatNumber, formatText } from '@/lib/format';
 import type { BankDetails } from '@/types/person';
@@ -32,6 +33,7 @@ function buildRows(details: BankDetails): Row[] {
 
 export default function BankDetailsScreen() {
   const { data, isLoading, error, reload } = useBankDetails();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
 
   if (isLoading) {
     return <ScreenLoader label="Loading bank details..." />;
@@ -51,7 +53,7 @@ export default function BankDetailsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -72,7 +74,6 @@ export default function BankDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,

@@ -4,6 +4,7 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useEducationQualifications } from '@/hooks/use-education-qualifications';
 import { formatDate, formatText } from '@/lib/format';
 import type { EducationQualification, QualificationSubject } from '@/types/person';
@@ -42,6 +43,8 @@ function buildSubjectRows(subject: QualificationSubject): Row[] {
 
 export default function EducationAndQualificationsScreen() {
   const { data, isLoading, error, reload } = useEducationQualifications();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading qualifications..." />;
@@ -60,7 +63,7 @@ export default function EducationAndQualificationsScreen() {
   if (data.length === 0) {
     return (
       <ScrollView
-        style={styles.container}
+        style={[styles.container, { backgroundColor }]}
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic"
       >
@@ -73,7 +76,7 @@ export default function EducationAndQualificationsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -84,7 +87,7 @@ export default function EducationAndQualificationsScreen() {
         return (
           <DetailCard key={qual.qualification_id}>
             {data.length > 1 && (
-              <Text style={styles.sectionTitle}>Qualification {qIndex + 1}</Text>
+              <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Qualification {qIndex + 1}</Text>
             )}
             {rows.map((row, rowIndex) => (
               <DetailRow
@@ -116,7 +119,6 @@ export default function EducationAndQualificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,
@@ -126,7 +128,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 4,

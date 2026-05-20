@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+
 type ScreenErrorProps = {
   title?: string;
   message?: string;
@@ -13,17 +15,27 @@ export function ScreenError({
   retryLabel = 'Try again',
   onRetry,
 }: ScreenErrorProps) {
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
+  const titleColor = useThemeColor({}, 'text');
+  const messageColor = useThemeColor({}, 'danger');
+  const retryButtonColor = useThemeColor({}, 'primary');
+  const retryButtonPressedColor = useThemeColor({}, 'primaryPressed');
+  const retryButtonTextColor = useThemeColor({}, 'onPrimary');
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      {message ? <Text style={styles.message}>{message}</Text> : null}
+    <View style={[styles.container, { backgroundColor }]}>
+      <Text style={[styles.title, { color: titleColor }]}>{title}</Text>
+      {message ? <Text style={[styles.message, { color: messageColor }]}>{message}</Text> : null}
       {onRetry ? (
         <Pressable
-          style={({ pressed }) => [styles.retryButton, pressed && styles.retryButtonPressed]}
+          style={({ pressed }) => [
+            styles.retryButton,
+            { backgroundColor: pressed ? retryButtonPressedColor : retryButtonColor },
+          ]}
           onPress={onRetry}
-          android_ripple={{ color: '#1D4ED8' }}
+          android_ripple={{ color: retryButtonPressedColor }}
         >
-          <Text style={styles.retryButtonText}>{retryLabel}</Text>
+          <Text style={[styles.retryButtonText, { color: retryButtonTextColor }]}>{retryLabel}</Text>
         </Pressable>
       ) : null}
     </View>
@@ -33,7 +45,6 @@ export function ScreenError({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
@@ -42,25 +53,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
   },
   message: {
     textAlign: 'center',
     fontSize: 14,
-    color: '#B91C1C',
   },
   retryButton: {
     marginTop: 6,
     borderRadius: 8,
-    backgroundColor: '#2563EB',
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  retryButtonPressed: {
-    backgroundColor: '#1D4ED8',
-  },
   retryButtonText: {
-    color: '#FFFFFF',
     fontWeight: '600',
   },
 });

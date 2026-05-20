@@ -4,6 +4,7 @@ import { DetailCard } from '@/components/detail-card';
 import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useEdiDetails } from '@/hooks/use-edi-details';
 import { formatCodeName, formatDate, formatText } from '@/lib/format';
 import type { EdiDetails } from '@/types/person';
@@ -28,6 +29,7 @@ function buildRows(details: EdiDetails): Row[] {
 
 export default function EDIScreen() {
   const { data, isLoading, error, reload } = useEdiDetails();
+  const backgroundColor = useThemeColor({}, 'groupedBackground');
 
   if (isLoading) {
     return <ScreenLoader label="Loading EDI details..." />;
@@ -47,7 +49,7 @@ export default function EDIScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -68,7 +70,6 @@ export default function EDIScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
   },
   content: {
     padding: 16,
