@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "inside-ucl",
+    "name": "InsideUCL",
     "slug": "inside-ucl",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cyb0rg56.inside-ucl"
+      "bundleIdentifier": "com.cyb0rg56.inside-ucl",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -47,6 +50,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "729708c1-ed94-4ed6-92ff-6d1806874c41"
+      }
     }
   }
 }
