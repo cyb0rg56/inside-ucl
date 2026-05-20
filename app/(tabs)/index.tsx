@@ -1,4 +1,4 @@
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { QUICK_LINKS } from '@/constants/test-data';
 import { UCL_BLUE, UCL_TEAL } from '@/constants/theme';
+import { useStaffNews } from '@/hooks/use-staff-news';
 
 
 function openUrl(url: string) {
@@ -18,6 +19,7 @@ function openUrl(url: string) {
 export default function HomeTab() {
   const { user } = useAuth();
   const cardBg = useThemeColor({}, 'background');
+  const { data: staffNews, isLoading: newsLoading } = useStaffNews();
 
   return (
     <ThemedView style={styles.root}>
@@ -162,6 +164,38 @@ export default function HomeTab() {
               </Pressable>
             ))}
           </View>
+
+          <View style={styles.sectionHeader}>
+            <ThemedText style={styles.sectionTitle}>Staff News</ThemedText>
+          </View>
+
+          {newsLoading ? (
+            <ActivityIndicator style={{ marginVertical: 20 }} />
+          ) : (
+            staffNews?.slice(0, 5).map((item) => (
+              <Pressable
+                key={item.url}
+                accessibilityRole="link"
+                onPress={() => WebBrowser.openBrowserAsync(item.url)}
+                style={({ pressed }) => [
+                  styles.announcementCard,
+                  { backgroundColor: cardBg },
+                  pressed && styles.pressed,
+                ]}
+              >
+                <ThemedText style={styles.announcementTitle}>
+                  {item.title}
+                </ThemedText>
+                <ThemedText style={styles.announcementBody} numberOfLines={3}>
+                  {item.summary}
+                </ThemedText>
+                <View style={styles.cardLinkRow}>
+                  <ThemedText style={styles.cardLink}>Read more</ThemedText>
+                  <Ionicons name="open-outline" size={16} color={UCL_BLUE} />
+                </View>
+              </Pressable>
+            ))
+          )}
         </ScrollView>
       </SafeAreaView>
     </ThemedView>
