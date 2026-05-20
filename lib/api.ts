@@ -80,3 +80,19 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   return (await response.json()) as T;
 }
+
+export async function apiFetchWithFallback<T>(
+  path: string,
+  fallback: T,
+  init?: RequestInit,
+): Promise<T> {
+  try {
+    return await apiFetch<T>(path, init);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === undefined) {
+      return fallback;
+    }
+
+    throw err;
+  }
+}
