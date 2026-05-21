@@ -1,12 +1,14 @@
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useBiometrics } from '@/hooks/use-biometrics';
 import { useAuth } from '@/lib/auth/auth-context';
 
 export default function SettingsTab() {
   const { user, signOut } = useAuth();
+  const { available, enabled, toggle } = useBiometrics();
 
   const onPressSignOut = () => {
     Alert.alert('Sign out', 'Are you sure you want to sign out?', [
@@ -33,6 +35,13 @@ export default function SettingsTab() {
             <ThemedText style={styles.secondary}>{user.email}</ThemedText>
           ) : null}
         </View>
+
+        {available && (
+          <View style={styles.row}>
+            <ThemedText style={styles.rowLabel}>Use Face ID / Touch ID</ThemedText>
+            <Switch value={enabled} onValueChange={toggle} />
+          </View>
+        )}
 
         <Pressable
           accessibilityRole="button"
@@ -79,5 +88,14 @@ const styles = StyleSheet.create({
   signOutLabel: {
     color: '#B91C1C',
     fontWeight: '600',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  rowLabel: {
+    fontSize: 16,
   },
 });

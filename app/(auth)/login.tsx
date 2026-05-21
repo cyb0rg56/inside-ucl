@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useAuth } from '@/lib/auth/auth-context';
 import {
   assertEntraConfigured,
   ENTRA_CLIENT_ID,
@@ -22,7 +23,11 @@ import {
   ENTRA_REDIRECT_URI,
   ENTRA_SCOPES,
 } from '@/lib/auth/config';
-import { useAuth } from '@/lib/auth/auth-context';
+import {
+  isBiometricsAvailable,
+  isBiometricsEnabled,
+  setBiometricsEnabled,
+} from '@/lib/biometrics';
 
 // Required so the auth session completes cleanly when the browser redirects
 // back to the app on web / Expo Go.
@@ -86,7 +91,24 @@ export default function LoginScreen() {
         );
         if (cancelled) return;
         await completeSignIn(tokenResponse);
-        // The root layout's auth guard will route the user into (tabs).
+        // Prompt biometric enrollment after first successful sign-in.
+        const bioAvailable = await isBiometricsAvailable();
+        const bioAlreadyEnabled = await isBiometricsEnabled();
+        if (bioAvailable && !bioAlreadyEnabled) {
+          Alert.alert(
+            'Enable Biometric Login',
+            'Would you like to use Face ID / Touch ID to quickly access Inside UCL?',
+            [
+              { text: 'Not now', style: 'cancel' },
+              {
+                text: 'Enable',
+                onPress: () => {
+                  void setBiometricsEnabled(true);
+                },
+              },
+            ]
+          );
+        }
       } catch (err) {
         if (cancelled) return;
         setLocalError(err instanceof Error ? err.message : 'Sign-in failed.');

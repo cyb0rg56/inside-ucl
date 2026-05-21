@@ -3,11 +3,12 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as WebBrowser from 'expo-web-browser';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '@/lib/auth/auth-context';
+import { authenticateWithBiometrics, isBiometricsEnabled } from '@/lib/biometrics';
 
 // Ensure the auth session completes on cold-start deep links before any
 // screen mounts. Must run at module-load time.
@@ -24,26 +25,53 @@ function useProtectedRoute() {
   const { isInitializing, isAuthenticated } = useAuth();
   const segments = useSegments() as string[];
   const router = useRouter();
+  const [biometricLocked, setBiometricLocked] = useState(true);
+  const biometricChecked = useRef(false);
 
+  // Biometric gate: runs once on cold start when authenticated.
+  useEffect(() => {
+    if (isInitializing || !isAuthenticated || biometricChecked.current) return;
+    biometricChecked.current = true;
+
+    (async () => {
+      const enabled = await isBiometricsEnabled();
+      if (enabled) {
+        const success = await authenticateWithBiometrics();
+        if (!success) {
+          // Keep locked — user can retry by reopening the app.
+          return;
+        }
+      }
+      setBiometricLocked(false);
+    })();
+  }, [isInitializing, isAuthenticated]);
+
+  // If biometrics not applicable, unlock immediately.
   useEffect(() => {
     if (isInitializing) return;
+    if (!isAuthenticated) {
+      setBiometricLocked(false);
+      return;
+    }
+  }, [isInitializing, isAuthenticated]);
+
+  useEffect(() => {
+    if (isInitializing || biometricLocked) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!isAuthenticated && !inAuthGroup) {
-      // Typed routes don't expose group-prefixed paths; the login screen
-      // lives at app/(auth)/login.tsx which Expo Router resolves correctly.
       router.replace('/login' as never);
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/');
     }
-  }, [isAuthenticated, isInitializing, router, segments]);
+  }, [isAuthenticated, isInitializing, biometricLocked, router, segments]);
 
   useEffect(() => {
-    if (!isInitializing) {
+    if (!isInitializing && !biometricLocked) {
       void SplashScreen.hideAsync();
     }
-  }, [isInitializing]);
+  }, [isInitializing, biometricLocked]);
 }
 
 function RootNavigator() {

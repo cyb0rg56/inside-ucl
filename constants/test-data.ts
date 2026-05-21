@@ -17,16 +17,24 @@ export type QuickLink = {
 
 export const QUICK_LINKS: QuickLink[] = [
   {
+    title: "Desk Booking",
+    url: "https://app.ucl.ac.uk/InsideUCL/AllDeskBookings"
+  },
+  {
+    title: "Time Off",
+    url: "https://app.ucl.ac.uk/InsideUCL/MyTimeOff_v2"
+  },
+  {
     title: "MyServices",
     url: "https://myservices.ucl.ac.uk/",
   },
   {
     title: "MyCampus Service Request",
-    url: "https://www.ucl.ac.uk/campus-estate/facilities-and-services/mycampus",
+    url: "https://www.ucl.ac.uk/estates/mycampus",
   },
   {
     title: "Report an Incident",
-    url: "https://www.ucl.ac.uk/safety-services/report-incident",
+    url: "https://www.ucl.ac.uk/staff/task/report-incident",
   },
   {
     title: "IT Help & Support",
