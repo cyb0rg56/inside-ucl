@@ -23,11 +23,6 @@ import {
   ENTRA_REDIRECT_URI,
   ENTRA_SCOPES,
 } from '@/lib/auth/config';
-import {
-  isBiometricsAvailable,
-  isBiometricsEnabled,
-  setBiometricsEnabled,
-} from '@/lib/biometrics';
 
 // Required so the auth session completes cleanly when the browser redirects
 // back to the app on web / Expo Go.
@@ -91,24 +86,6 @@ export default function LoginScreen() {
         );
         if (cancelled) return;
         await completeSignIn(tokenResponse);
-        // Prompt biometric enrollment after first successful sign-in.
-        const bioAvailable = await isBiometricsAvailable();
-        const bioAlreadyEnabled = await isBiometricsEnabled();
-        if (bioAvailable && !bioAlreadyEnabled) {
-          Alert.alert(
-            'Enable Biometric Login',
-            'Would you like to use Face ID / Touch ID to quickly access Inside UCL?',
-            [
-              { text: 'Not now', style: 'cancel' },
-              {
-                text: 'Enable',
-                onPress: () => {
-                  void setBiometricsEnabled(true);
-                },
-              },
-            ]
-          );
-        }
       } catch (err) {
         if (cancelled) return;
         setLocalError(err instanceof Error ? err.message : 'Sign-in failed.');

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 
 import {
+  authenticateWithBiometrics,
   isBiometricsAvailable,
   isBiometricsEnabled,
   setBiometricsEnabled,
@@ -28,7 +30,22 @@ export function useBiometrics() {
     };
   }, []);
 
+  // Re-read enabled state when the screen regains focus (e.g. after the
+  // biometric-setup modal changes the value).
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const en = await isBiometricsEnabled();
+        setEnabled(en);
+      })();
+    }, [])
+  );
+
   const toggle = useCallback(async (value: boolean) => {
+    if (value) {
+      const success = await authenticateWithBiometrics();
+      if (!success) return;
+    }
     await setBiometricsEnabled(value);
     setEnabled(value);
   }, []);

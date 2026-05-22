@@ -1,8 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 const BIOMETRICS_ENABLED_KEY = 'insideucl.biometrics.enabled';
+const BIOMETRICS_PROMPTED_KEY = 'insideucl.biometrics.prompted';
 
 const isSecureStoreAvailable = Platform.OS === 'ios' || Platform.OS === 'android';
 
@@ -35,4 +37,13 @@ export async function authenticateWithBiometrics(): Promise<boolean> {
     disableDeviceFallback: false,
   });
   return result.success;
+}
+
+export async function hasBiometricPromptBeenShown(): Promise<boolean> {
+  const value = await AsyncStorage.getItem(BIOMETRICS_PROMPTED_KEY);
+  return value === 'true';
+}
+
+export async function markBiometricPromptShown(): Promise<void> {
+  await AsyncStorage.setItem(BIOMETRICS_PROMPTED_KEY, 'true');
 }

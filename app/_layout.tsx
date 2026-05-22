@@ -8,7 +8,12 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '@/lib/auth/auth-context';
-import { authenticateWithBiometrics, isBiometricsEnabled } from '@/lib/biometrics';
+import {
+  authenticateWithBiometrics,
+  hasBiometricPromptBeenShown,
+  isBiometricsAvailable,
+  isBiometricsEnabled,
+} from '@/lib/biometrics';
 
 // Ensure the auth session completes on cold-start deep links before any
 // screen mounts. Must run at module-load time.
@@ -27,6 +32,7 @@ function useProtectedRoute() {
   const router = useRouter();
   const [biometricLocked, setBiometricLocked] = useState(true);
   const biometricChecked = useRef(false);
+  const enrollmentPrompted = useRef(false);
 
   // Biometric gate: runs once on cold start when authenticated.
   useEffect(() => {
@@ -67,6 +73,29 @@ function useProtectedRoute() {
     }
   }, [isAuthenticated, isInitializing, biometricLocked, router, segments]);
 
+  // Biometric enrollment prompt: fires once after first sign-in lands on home.
+  useEffect(() => {
+    if (isInitializing || biometricLocked || !isAuthenticated) return;
+    if (enrollmentPrompted.current) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+    if (inAuthGroup) return;
+
+    enrollmentPrompted.current = true;
+
+    (async () => {
+      const [available, alreadyEnabled, alreadyPrompted] = await Promise.all([
+        isBiometricsAvailable(),
+        isBiometricsEnabled(),
+        hasBiometricPromptBeenShown(),
+      ]);
+      if (available && !alreadyEnabled && !alreadyPrompted) {
+        // Small delay so the home screen renders first.
+        setTimeout(() => router.push('/biometric-setup'), 500);
+      }
+    })();
+  }, [isInitializing, biometricLocked, isAuthenticated, segments, router]);
+
   useEffect(() => {
     if (!isInitializing && !biometricLocked) {
       void SplashScreen.hideAsync();
@@ -82,6 +111,7 @@ function RootNavigator() {
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+      <Stack.Screen name="biometric-setup" options={{ presentation: 'modal', headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
     </Stack>
   );
