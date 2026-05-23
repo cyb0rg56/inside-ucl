@@ -48,7 +48,8 @@
         {
           "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID to quickly sign in."
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true,
