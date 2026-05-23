@@ -1,7 +1,4 @@
-import { ScrollView, StyleSheet, Text } from 'react-native';
-
-import { DetailCard } from '@/components/detail-card';
-import { DetailRow } from '@/components/detail-row';
+import { DetailFieldGroup, type DetailSection } from '@/components/native/detail-field-group';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -42,7 +39,6 @@ function buildPhoneRows(phone: Phone, index: number): Row[] {
 export default function ContactDetailsScreen() {
   const { data, isLoading, error, reload } = useContactDetails();
   const backgroundColor = useThemeColor({}, 'groupedBackground');
-  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading contact details..." />;
@@ -61,76 +57,20 @@ export default function ContactDetailsScreen() {
   const addresses = data.address_collection?.address ?? [];
   const phones = data.phone_collection?.phone ?? [];
 
-  return (
-    <ScrollView
-      style={[styles.container, { backgroundColor }]}
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
-    >
-      <DetailCard>
-        <DetailRow label="Email" value={formatText(data.email)} isLast={addresses.length === 0 && phones.length === 0} />
-      </DetailCard>
+  const sections: DetailSection[] = [
+    {
+      title: 'Email',
+      rows: [{ key: 'email', label: 'Email', value: formatText(data.email) }],
+    },
+    ...addresses.map((address, index) => ({
+      title: address.is_primary_address ? 'Primary Address' : `Address ${index + 1}`,
+      rows: buildAddressRows(address, index),
+    })),
+    ...phones.map((phone, index) => ({
+      title: phones.length > 1 ? `Phone ${index + 1}` : 'Phone',
+      rows: buildPhoneRows(phone, index),
+    })),
+  ];
 
-      {addresses.map((address, index) => {
-        const rows = buildAddressRows(address, index);
-        return (
-          <DetailCard key={address.identifier} style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
-              {address.is_primary_address ? 'Primary Address' : `Address ${index + 1}`}
-            </Text>
-            {rows.map((row, rowIndex) => (
-              <DetailRow
-                key={row.key}
-                label={row.label}
-                value={row.value}
-                isLast={rowIndex === rows.length - 1}
-              />
-            ))}
-          </DetailCard>
-        );
-      })}
-
-      {phones.map((phone, index) => {
-        const rows = buildPhoneRows(phone, index);
-        return (
-          <DetailCard key={phone.identifier} style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
-              {`Phone ${phones.length > 1 ? index + 1 : ''}`}
-            </Text>
-            {rows.map((row, rowIndex) => (
-              <DetailRow
-                key={row.key}
-                label={row.label}
-                value={row.value}
-                isLast={rowIndex === rows.length - 1}
-              />
-            ))}
-          </DetailCard>
-        );
-      })}
-    </ScrollView>
-  );
+  return <DetailFieldGroup style={{ backgroundColor }} sections={sections} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 24,
-    gap: 16,
-  },
-  section: {
-    marginTop: 0,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-});

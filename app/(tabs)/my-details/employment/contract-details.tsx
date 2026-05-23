@@ -1,7 +1,4 @@
-import { ScrollView, StyleSheet, Text } from 'react-native';
-
-import { DetailCard } from '@/components/detail-card';
-import { DetailRow } from '@/components/detail-row';
+import { DetailFieldGroup, type DetailSection } from '@/components/native/detail-field-group';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -43,7 +40,6 @@ function buildRows(info: EmploymentInfo): Row[] {
 export default function ContractDetailsScreen() {
   const { data, isLoading, error, reload } = useEmploymentInfo();
   const backgroundColor = useThemeColor({}, 'groupedBackground');
-  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading contract details..." />;
@@ -61,64 +57,18 @@ export default function ContractDetailsScreen() {
 
   if (data.length === 0) {
     return (
-      <ScrollView
-        style={[styles.container, { backgroundColor }]}
-        contentContainerStyle={styles.content}
-        contentInsetAdjustmentBehavior="automatic"
-      >
-        <DetailCard>
-          <DetailRow label="Status" value="No contract details found." isLast />
-        </DetailCard>
-      </ScrollView>
+      <DetailFieldGroup
+        style={{ backgroundColor }}
+        sections={[{ rows: [{ key: 'status', label: 'Status', value: 'No contract details found.' }] }]}
+      />
     );
   }
 
-  return (
-    <ScrollView
-      style={[styles.container, { backgroundColor }]}
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
-    >
-      {data.map((info, index) => {
-        const rows = buildRows(info);
-        return (
-          <DetailCard key={info.assignment_number}>
-            {data.length > 1 && (
-              <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
-                {info.primary ? 'Primary Assignment' : `Assignment ${index + 1}`}
-              </Text>
-            )}
-            {rows.map((row, rowIndex) => (
-              <DetailRow
-                key={row.key}
-                label={row.label}
-                value={row.value}
-                isLast={rowIndex === rows.length - 1}
-              />
-            ))}
-          </DetailCard>
-        );
-      })}
-    </ScrollView>
-  );
-}
+  const sections: DetailSection[] = data.map((info, index) => ({
+    title:
+      data.length > 1 ? (info.primary ? 'Primary Assignment' : `Assignment ${index + 1}`) : undefined,
+    rows: buildRows(info),
+  }));
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 24,
-    gap: 16,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-});
+  return <DetailFieldGroup style={{ backgroundColor }} sections={sections} />;
+}

@@ -1,7 +1,4 @@
-import { ScrollView, StyleSheet } from 'react-native';
-
-import { DetailCard } from '@/components/detail-card';
-import { DetailRow } from '@/components/detail-row';
+import { DetailFieldGroup } from '@/components/native/detail-field-group';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -45,34 +42,10 @@ export default function EDIScreen() {
     );
   }
 
-  const rows = buildRows(data);
-
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor }]}
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
-    >
-      <DetailCard>
-        {rows.map((row, index) => (
-          <DetailRow
-            key={row.key}
-            label={row.label}
-            value={row.value}
-            isLast={index === rows.length - 1}
-          />
-        ))}
-      </DetailCard>
-    </ScrollView>
+    <DetailFieldGroup
+      style={{ backgroundColor }}
+      sections={[{ rows: buildRows(data) }]}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 24,
-  },
-});

@@ -1,7 +1,4 @@
-import { ScrollView, StyleSheet, Text } from 'react-native';
-
-import { DetailCard } from '@/components/detail-card';
-import { DetailRow } from '@/components/detail-row';
+import { DetailFieldGroup, type DetailSection } from '@/components/native/detail-field-group';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -73,21 +70,9 @@ function buildNetPayRows(payslip: Payslip): Row[] {
   ];
 }
 
-function renderSection(title: string, rows: Row[], sectionTitleColor: string) {
-  return (
-    <DetailCard>
-      <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>{title}</Text>
-      {rows.map((row, i) => (
-        <DetailRow key={row.key} label={row.label} value={row.value} isLast={i === rows.length - 1} />
-      ))}
-    </DetailCard>
-  );
-}
-
 export default function PayslipsScreen() {
   const { data, isLoading, error, reload } = usePayslip();
   const backgroundColor = useThemeColor({}, 'groupedBackground');
-  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading payslip..." />;
@@ -107,71 +92,49 @@ export default function PayslipsScreen() {
   const deductions = data.employee_deductions ?? [];
   const balances = data.employee_pay_balances ?? [];
 
-  return (
-    <ScrollView
-      style={[styles.container, { backgroundColor }]}
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
-    >
-      {renderSection('Pay Period', buildPayPeriodRows(data), sectionTitleColor)}
-      {renderSection('Employee', buildEmployeeRows(data), sectionTitleColor)}
-      {renderSection('Payment Summary', buildSummaryRows(data), sectionTitleColor)}
+  const sections: DetailSection[] = [
+    { title: 'Pay Period', rows: buildPayPeriodRows(data) },
+    { title: 'Employee', rows: buildEmployeeRows(data) },
+    { title: 'Payment Summary', rows: buildSummaryRows(data) },
+  ];
 
-      {earnings.length > 0 &&
-        renderSection(
-          'Earnings',
-          earnings.map((e, i) => ({
-            key: `earning_${i}`,
-            label: e.element_name,
-            value: formatCurrency(e.pay_value),
-          })),
-          sectionTitleColor,
-        )}
+  if (earnings.length > 0) {
+    sections.push({
+      title: 'Earnings',
+      rows: earnings.map((earning, index) => ({
+        key: `earning_${index}`,
+        label: earning.element_name,
+        value: formatCurrency(earning.pay_value),
+      })),
+    });
+  }
 
-      {deductions.length > 0 &&
-        renderSection(
-          'Deductions',
-          deductions.map((d, i) => ({
-            key: `deduction_${i}`,
-            label: d.element_name,
-            value: formatCurrency(d.element_value),
-          })),
-          sectionTitleColor,
-        )}
+  if (deductions.length > 0) {
+    sections.push({
+      title: 'Deductions',
+      rows: deductions.map((deduction, index) => ({
+        key: `deduction_${index}`,
+        label: deduction.element_name,
+        value: formatCurrency(deduction.element_value),
+      })),
+    });
+  }
 
-      {renderSection('Tax Details', buildTaxRows(data), sectionTitleColor)}
-      {renderSection('Net Pay Distribution', buildNetPayRows(data), sectionTitleColor)}
-
-      {balances.length > 0 &&
-        renderSection(
-          'Pay Balances',
-          balances.map((b, i) => ({
-            key: `balance_${i}`,
-            label: b.balance_name,
-            value: formatCurrency(b.pay_value),
-          })),
-          sectionTitleColor,
-        )}
-    </ScrollView>
+  sections.push(
+    { title: 'Tax Details', rows: buildTaxRows(data) },
+    { title: 'Net Pay Distribution', rows: buildNetPayRows(data) },
   );
-}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 24,
-    gap: 16,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-});
+  if (balances.length > 0) {
+    sections.push({
+      title: 'Pay Balances',
+      rows: balances.map((balance, index) => ({
+        key: `balance_${index}`,
+        label: balance.balance_name,
+        value: formatCurrency(balance.pay_value),
+      })),
+    });
+  }
+
+  return <DetailFieldGroup style={{ backgroundColor }} sections={sections} />;
+}

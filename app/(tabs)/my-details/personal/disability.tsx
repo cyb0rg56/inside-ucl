@@ -1,7 +1,4 @@
-import { ScrollView, StyleSheet, Text } from 'react-native';
-
-import { DetailCard } from '@/components/detail-card';
-import { DetailRow } from '@/components/detail-row';
+import { DetailFieldGroup, type DetailSection } from '@/components/native/detail-field-group';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -36,7 +33,6 @@ function buildRows(detail: DisabilityDetail): Row[] {
 export default function DisabilityScreen() {
   const { data, isLoading, error, reload } = useDisabilityDetails();
   const backgroundColor = useThemeColor({}, 'groupedBackground');
-  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading disability details..." />;
@@ -54,65 +50,17 @@ export default function DisabilityScreen() {
 
   if (data.length === 0) {
     return (
-      <ScrollView
-        style={[styles.container, { backgroundColor }]}
-        contentContainerStyle={styles.content}
-        contentInsetAdjustmentBehavior="automatic"
-      >
-        <DetailCard>
-          <DetailRow label="Status" value="No disability records found." isLast />
-        </DetailCard>
-      </ScrollView>
+      <DetailFieldGroup
+        style={{ backgroundColor }}
+        sections={[{ rows: [{ key: 'status', label: 'Status', value: 'No disability records found.' }] }]}
+      />
     );
   }
 
-  return (
-    <ScrollView
-      style={[styles.container, { backgroundColor }]}
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
-    >
-      {data.map((detail, index) => {
-        const rows = buildRows(detail);
-        return (
-          <DetailCard key={detail.disability_id} style={index > 0 ? styles.section : undefined}>
-            {data.length > 1 && (
-              <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Record {index + 1}</Text>
-            )}
-            {rows.map((row, rowIndex) => (
-              <DetailRow
-                key={row.key}
-                label={row.label}
-                value={row.value}
-                isLast={rowIndex === rows.length - 1}
-              />
-            ))}
-          </DetailCard>
-        );
-      })}
-    </ScrollView>
-  );
-}
+  const sections: DetailSection[] = data.map((detail, index) => ({
+    title: data.length > 1 ? `Record ${index + 1}` : undefined,
+    rows: buildRows(detail),
+  }));
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 24,
-    gap: 16,
-  },
-  section: {
-    marginTop: 0,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-});
+  return <DetailFieldGroup style={{ backgroundColor }} sections={sections} />;
+}

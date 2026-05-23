@@ -1,7 +1,4 @@
-import { ScrollView, StyleSheet, Text } from 'react-native';
-
-import { DetailCard } from '@/components/detail-card';
-import { DetailRow } from '@/components/detail-row';
+import { DetailFieldGroup, type DetailSection } from '@/components/native/detail-field-group';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -30,21 +27,34 @@ function buildRows(qual: EducationQualification): Row[] {
   ];
 }
 
-function buildSubjectRows(subject: QualificationSubject): Row[] {
+function buildSubjectRows(subject: QualificationSubject, subjectIndex: number): Row[] {
+  const prefix = `sub_${subjectIndex}`;
   return [
-    { key: 'subject', label: 'Subject', value: formatText(subject.subject) },
-    { key: 'code', label: 'Subject Code', value: formatText(subject.subject_code) },
-    { key: 'status', label: 'Status', value: formatText(subject.subject_status_code) },
-    { key: 'grade', label: 'Grade Attained', value: formatText(subject.grade_attained) },
-    { key: 'start_date', label: 'Start Date', value: formatDate(subject.start_date) },
-    { key: 'end_date', label: 'End Date', value: formatDate(subject.end_date) },
+    { key: `${prefix}_subject`, label: 'Subject', value: formatText(subject.subject) },
+    { key: `${prefix}_code`, label: 'Subject Code', value: formatText(subject.subject_code) },
+    { key: `${prefix}_status`, label: 'Status', value: formatText(subject.subject_status_code) },
+    { key: `${prefix}_grade`, label: 'Grade Attained', value: formatText(subject.grade_attained) },
+    { key: `${prefix}_start_date`, label: 'Start Date', value: formatDate(subject.start_date) },
+    { key: `${prefix}_end_date`, label: 'End Date', value: formatDate(subject.end_date) },
   ];
+}
+
+function buildQualificationSection(qual: EducationQualification, index: number, total: number): DetailSection {
+  const subjects = qual.qualification_subject_collection?.qualification_subject ?? [];
+  const rows = [
+    ...buildRows(qual),
+    ...subjects.flatMap((subject, subjectIndex) => buildSubjectRows(subject, subjectIndex)),
+  ];
+
+  return {
+    title: total > 1 ? `Qualification ${index + 1}` : undefined,
+    rows,
+  };
 }
 
 export default function EducationAndQualificationsScreen() {
   const { data, isLoading, error, reload } = useEducationQualifications();
   const backgroundColor = useThemeColor({}, 'groupedBackground');
-  const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
   if (isLoading) {
     return <ScreenLoader label="Loading qualifications..." />;
@@ -62,76 +72,14 @@ export default function EducationAndQualificationsScreen() {
 
   if (data.length === 0) {
     return (
-      <ScrollView
-        style={[styles.container, { backgroundColor }]}
-        contentContainerStyle={styles.content}
-        contentInsetAdjustmentBehavior="automatic"
-      >
-        <DetailCard>
-          <DetailRow label="Status" value="No qualifications found." isLast />
-        </DetailCard>
-      </ScrollView>
+      <DetailFieldGroup
+        style={{ backgroundColor }}
+        sections={[{ rows: [{ key: 'status', label: 'Status', value: 'No qualifications found.' }] }]}
+      />
     );
   }
 
-  return (
-    <ScrollView
-      style={[styles.container, { backgroundColor }]}
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
-    >
-      {data.map((qual, qIndex) => {
-        const rows = buildRows(qual);
-        const subjects = qual.qualification_subject_collection?.qualification_subject ?? [];
+  const sections = data.map((qual, index) => buildQualificationSection(qual, index, data.length));
 
-        return (
-          <DetailCard key={qual.qualification_id}>
-            {data.length > 1 && (
-              <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Qualification {qIndex + 1}</Text>
-            )}
-            {rows.map((row, rowIndex) => (
-              <DetailRow
-                key={row.key}
-                label={row.label}
-                value={row.value}
-                isLast={rowIndex === rows.length - 1 && subjects.length === 0}
-              />
-            ))}
-
-            {subjects.map((subject, sIndex) => {
-              const subjectRows = buildSubjectRows(subject);
-              return subjectRows.map((row, rowIndex) => (
-                <DetailRow
-                  key={`sub_${sIndex}_${row.key}`}
-                  label={row.label}
-                  value={row.value}
-                  isLast={sIndex === subjects.length - 1 && rowIndex === subjectRows.length - 1}
-                />
-              ));
-            })}
-          </DetailCard>
-        );
-      })}
-    </ScrollView>
-  );
+  return <DetailFieldGroup style={{ backgroundColor }} sections={sections} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 24,
-    gap: 16,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-});
