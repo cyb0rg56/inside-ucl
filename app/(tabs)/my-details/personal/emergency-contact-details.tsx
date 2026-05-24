@@ -5,7 +5,10 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useEmergencyContacts } from '@/hooks/use-emergency-contacts';
+import { useQuery } from '@tanstack/react-query';
+
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import { formatText } from '@/lib/format';
 import type { EmergencyContact } from '@/types/person';
 
@@ -52,11 +55,15 @@ function buildContactRows(contact: EmergencyContact): Row[] {
 }
 
 export default function EmergencyContactDetailsScreen() {
-  const { data, isLoading, error, reload } = useEmergencyContacts();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.emergencyContacts(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
   const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading emergency contacts..." />;
   }
 
@@ -65,7 +72,7 @@ export default function EmergencyContactDetailsScreen() {
       <ScreenError
         title="Could not load details"
         message={error?.message ?? 'Emergency contact details are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

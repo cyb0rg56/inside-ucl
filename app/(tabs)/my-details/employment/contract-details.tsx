@@ -5,7 +5,10 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useEmploymentInfo } from '@/hooks/use-employment-info';
+import { useQuery } from '@tanstack/react-query';
+
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import { formatDate, formatText } from '@/lib/format';
 import type { EmploymentInfo } from '@/types/person';
 
@@ -41,11 +44,15 @@ function buildRows(info: EmploymentInfo): Row[] {
 }
 
 export default function ContractDetailsScreen() {
-  const { data, isLoading, error, reload } = useEmploymentInfo();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.employmentInfo(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
   const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading contract details..." />;
   }
 
@@ -54,7 +61,7 @@ export default function ContractDetailsScreen() {
       <ScreenError
         title="Could not load details"
         message={error?.message ?? 'Contract details are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

@@ -5,7 +5,10 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useContactDetails } from '@/hooks/use-contact-details';
+import { useQuery } from '@tanstack/react-query';
+
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import { formatCodeName, formatDate, formatList, formatText } from '@/lib/format';
 import type { Address, Phone } from '@/types/person';
 
@@ -40,11 +43,15 @@ function buildPhoneRows(phone: Phone, index: number): Row[] {
 }
 
 export default function ContactDetailsScreen() {
-  const { data, isLoading, error, reload } = useContactDetails();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.contactDetails(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
   const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading contact details..." />;
   }
 
@@ -53,7 +60,7 @@ export default function ContactDetailsScreen() {
       <ScreenError
         title="Could not load details"
         message={error?.message ?? 'Contact details are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

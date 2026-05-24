@@ -5,7 +5,10 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { usePayslip } from '@/hooks/use-payslip';
+import { useQuery } from '@tanstack/react-query';
+
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import { formatDate, formatText } from '@/lib/format';
 import type { Payslip } from '@/types/person';
 
@@ -85,11 +88,15 @@ function renderSection(title: string, rows: Row[], sectionTitleColor: string) {
 }
 
 export default function PayslipsScreen() {
-  const { data, isLoading, error, reload } = usePayslip();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.payslip(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
   const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading payslip..." />;
   }
 
@@ -98,7 +105,7 @@ export default function PayslipsScreen() {
       <ScreenError
         title="Could not load payslip"
         message={error?.message ?? 'Payslip details are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import { DetailCard } from '@/components/detail-card';
@@ -5,7 +6,8 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { usePersonDetails } from '@/hooks/use-person-details';
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import {
   formatCodeName,
   formatDate,
@@ -90,10 +92,14 @@ function buildRows(details: PersonalDetails): Row[] {
 }
 
 export default function BasicDetailsScreen() {
-  const { data, isLoading, error, reload } = usePersonDetails();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.personalDetails(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading basic details..." />;
   }
 
@@ -102,7 +108,7 @@ export default function BasicDetailsScreen() {
       <ScreenError
         title="Could not load details"
         message={error?.message ?? 'Personal details are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

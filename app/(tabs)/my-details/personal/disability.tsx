@@ -5,7 +5,10 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useDisabilityDetails } from '@/hooks/use-disability-details';
+import { useQuery } from '@tanstack/react-query';
+
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import { formatDate, formatText } from '@/lib/format';
 import type { DisabilityDetail } from '@/types/person';
 
@@ -34,11 +37,15 @@ function buildRows(detail: DisabilityDetail): Row[] {
 }
 
 export default function DisabilityScreen() {
-  const { data, isLoading, error, reload } = useDisabilityDetails();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.disability(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
   const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading disability details..." />;
   }
 
@@ -47,7 +54,7 @@ export default function DisabilityScreen() {
       <ScreenError
         title="Could not load details"
         message={error?.message ?? 'Disability details are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

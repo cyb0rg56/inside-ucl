@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +10,7 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { QUICK_LINKS } from '@/constants/test-data';
 import { UCL_BLUE, UCL_TEAL } from '@/constants/theme';
-import { useStaffNews } from '@/hooks/use-staff-news';
+import { staffNewsQueries } from '@/lib/queries/staff-news';
 
 
 function openUrl(url: string) {
@@ -19,7 +20,7 @@ function openUrl(url: string) {
 export default function HomeTab() {
   const { user } = useAuth();
   const cardBg = useThemeColor({}, 'background');
-  const { data: staffNews, isLoading: newsLoading } = useStaffNews();
+  const { data: staffNews, isPending: newsLoading } = useQuery(staffNewsQueries.list());
 
   return (
     <ThemedView style={styles.root}>

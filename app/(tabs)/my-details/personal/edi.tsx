@@ -5,7 +5,10 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useEdiDetails } from '@/hooks/use-edi-details';
+import { useQuery } from '@tanstack/react-query';
+
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import { formatCodeName, formatDate, formatText } from '@/lib/format';
 import type { EdiDetails } from '@/types/person';
 
@@ -28,10 +31,14 @@ function buildRows(details: EdiDetails): Row[] {
 }
 
 export default function EDIScreen() {
-  const { data, isLoading, error, reload } = useEdiDetails();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.edi(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading EDI details..." />;
   }
 
@@ -40,7 +47,7 @@ export default function EDIScreen() {
       <ScreenError
         title="Could not load details"
         message={error?.message ?? 'EDI details are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

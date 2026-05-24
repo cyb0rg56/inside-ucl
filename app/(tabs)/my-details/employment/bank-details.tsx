@@ -5,7 +5,10 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useBankDetails } from '@/hooks/use-bank-details';
+import { useQuery } from '@tanstack/react-query';
+
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import { formatNumber, formatText } from '@/lib/format';
 import type { BankDetails } from '@/types/person';
 
@@ -32,10 +35,14 @@ function buildRows(details: BankDetails): Row[] {
 }
 
 export default function BankDetailsScreen() {
-  const { data, isLoading, error, reload } = useBankDetails();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.bankDetails(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading bank details..." />;
   }
 
@@ -44,7 +51,7 @@ export default function BankDetailsScreen() {
       <ScreenError
         title="Could not load details"
         message={error?.message ?? 'Bank details are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

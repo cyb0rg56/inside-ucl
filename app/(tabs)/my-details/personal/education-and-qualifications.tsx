@@ -5,7 +5,10 @@ import { DetailRow } from '@/components/detail-row';
 import { ScreenError } from '@/components/screen-error';
 import { ScreenLoader } from '@/components/screen-loader';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useEducationQualifications } from '@/hooks/use-education-qualifications';
+import { useQuery } from '@tanstack/react-query';
+
+import { useAuth } from '@/lib/auth/auth-context';
+import { personQueries } from '@/lib/queries/person';
 import { formatDate, formatText } from '@/lib/format';
 import type { EducationQualification, QualificationSubject } from '@/types/person';
 
@@ -42,11 +45,15 @@ function buildSubjectRows(subject: QualificationSubject): Row[] {
 }
 
 export default function EducationAndQualificationsScreen() {
-  const { data, isLoading, error, reload } = useEducationQualifications();
+  const { isAuthenticated } = useAuth();
+  const { data, isPending, error, refetch } = useQuery({
+    ...personQueries.education(),
+    enabled: isAuthenticated,
+  });
   const backgroundColor = useThemeColor({}, 'groupedBackground');
   const sectionTitleColor = useThemeColor({}, 'textSecondary');
 
-  if (isLoading) {
+  if (isPending) {
     return <ScreenLoader label="Loading qualifications..." />;
   }
 
@@ -55,7 +62,7 @@ export default function EducationAndQualificationsScreen() {
       <ScreenError
         title="Could not load details"
         message={error?.message ?? 'Education and qualifications are unavailable.'}
-        onRetry={() => void reload()}
+        onRetry={() => void refetch()}
       />
     );
   }

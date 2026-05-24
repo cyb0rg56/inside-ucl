@@ -13,6 +13,8 @@ import {
   type PropsWithChildren,
 } from 'react';
 
+import { queryClient } from '@/lib/query-client';
+
 import { setAccessTokenProvider } from '../api';
 import {
   ENTRA_CLIENT_ID,
@@ -144,6 +146,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const clearLocal = useCallback(async () => {
     await clearSession();
+    queryClient.clear();
     setSession(null);
     setUser(null);
   }, []);
